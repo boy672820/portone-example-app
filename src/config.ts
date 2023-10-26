@@ -1,6 +1,7 @@
 export interface IConfig {
   portone: {
     storeId: string;
+    storeCode: string;
     channelKey: string;
   };
 }
@@ -8,6 +9,7 @@ export interface IConfig {
 const config: IConfig = {
   portone: {
     storeId: process.env.REACT_APP_PORTONE_STORE_ID,
+    storeCode: process.env.REACT_APP_PORTONE_STORE_CODE,
     channelKey: process.env.REACT_APP_PORTONE_CHANNEL_KEY,
   },
 };

@@ -1,46 +1,71 @@
-# Getting Started with Create React App
+# 포트원 SDK 연동 예제
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+포트원((구)아임포트)에서 제공하는 SDK 사용 방법
 
-## Available Scripts
+> 포트원 SDK는 V1 사용 중입니다. V2는 결제 시 문제가 있어 현재 문의 중
 
-In the project directory, you can run:
+## 결제하기
 
-### `npm start`
+`/public/index.html` 파일에 다음 스크립트 태그를 추가한다.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```html
+<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+그리고 `window` 객체에서 `IMP` 객체를 찾는다. 결제 메서드는 `request_pay`
 
-### `npm test`
+##### 파라미터 객체
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| 프로퍼티     | 설명                           |
+| ------------ | ------------------------------ |
+| pg           | 선택할 결제사(문자열)          |
+| pay_method   | 결제 수단                      |
+| merchant_uid | 결제 고유번호로 직접 생성한다. |
+| name         | 주문명                         |
 
-### `npm run build`
+##### 결제자 정보
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| 프로퍼티       | 설명     |
+| -------------- | -------- |
+| buyer_email    | 이메일   |
+| buyer_name     | 이름     |
+| buyer_tel      | 전화번호 |
+| buyer_addr     | 주소     |
+| buyer_postcode | 주소번호 |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+결제 후 다음과 같이 결제자 정보가 자동으로 입력되어 진다.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+예시로 구매자 이름은 "홍길동", 이메일은 "gildong@gmail.com"으로 되어 있다.
 
-### `npm run eject`
+![](./screen-finished-payment.png)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 응답 JSON 예제
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```json
+{
+  "success": true,
+  "imp_uid": "imp_557602550454",
+  "pay_method": "card",
+  "merchant_uid": "merchant_1698309602250",
+  "name": "주문명:결제테스트",
+  "paid_amount": 1,
+  "currency": "KRW",
+  "pg_provider": "html5_inicis",
+  "pg_type": "payment",
+  "pg_tid": "StdpayCARDINIpayTest20231026174122328482",
+  "apply_num": "30008345",
+  "buyer_name": "홍길동",
+  "buyer_email": "gildong@gmail.com",
+  "buyer_tel": "010-4242-4242",
+  "buyer_addr": "서울특별시 강남구 신사동",
+  "buyer_postcode": "01181",
+  "custom_data": null,
+  "status": "paid",
+  "paid_at": 1698309682,
+  "receipt_url": "https://iniweb.inicis.com/DefaultWebApp/mall/cr/cm/mCmReceipt_head.jsp?noTid=StdpayCARDINIpayTest20231026174122328482&noMethod=1",
+  "card_name": "국민KB카드",
+  "bank_name": null,
+  "card_quota": 0,
+  "card_number": "523612*********0"
+}
+```
