@@ -66,6 +66,6 @@
   "card_name": "국민KB카드",
   "bank_name": null,
   "card_quota": 0,
-  "card_number": "523612*********0"
+  "card_number": "***************0"
 }
 ```
