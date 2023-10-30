@@ -17,7 +17,7 @@ const axiosInstance = axios.create({
   baseURL: 'https://api.iamport.kr',
 });
 
-export async function getInstance() {
+async function getHttpInstance() {
   try {
     const response = await axiosInstance.post('/users/getToken', {
       imp_key: config.apiKey,
@@ -26,21 +26,21 @@ export async function getInstance() {
 
     const accessToken = response.data.response.access_token;
 
-    if (accessToken) {
-      axiosInstance.defaults.headers.common['Authorization'] =
-        'Bearer ' + accessToken;
-
-      return axiosInstance;
-    } else {
+    if (!accessToken) {
       throw new Error('토큰 발급에 실패했습니다.');
     }
+
+    axiosInstance.defaults.headers.common['Authorization'] =
+      'Bearer ' + accessToken;
+
+    return axiosInstance;
   } catch (e) {
     throw new Error('토큰 발급에 실패했습니다. 서버를 재시작 해주세요.');
   }
 }
 
 export async function main() {
-  const axios = await getInstance();
+  const axios = await getHttpInstance();
 
   const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -69,13 +69,51 @@ export async function main() {
             amount: data.amount,
           })
           .then(({ data }) => {
-            const body = {
-              merchant_uid: data.response.merchant_uid,
-              amount: data.response.amount,
-            };
-
             res.writeHead(201, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(body));
+            res.end(
+              JSON.stringify({
+                orderId: data.response.merchant_uid,
+                amount: data.response.amount,
+              })
+            );
+          })
+          .catch((e) => {
+            console.error('에러 발생', e);
+            res.writeHead(500);
+            res.end('Internal Server Error');
+          });
+      });
+    }
+
+    if (req.url === '/payments/complete' && req.method === 'POST') {
+      req.on('data', (buffer: Buffer) => {
+        const data = JSON.parse(buffer.toString());
+
+        if (
+          typeof data?.orderId !== 'string' ||
+          typeof data?.paymentId !== 'string'
+        ) {
+          res.statusCode = 400;
+          res.end('Bad Request');
+          return;
+        }
+
+        axios
+          .get(`/payments/${data.paymentId}`)
+          .then((response) => {
+            if (response.data.response.merchant_uid !== data.orderId) {
+              res.statusCode = 403;
+              res.end('잘못된 결제 정보입니다.');
+              return;
+            }
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(response.data));
+          })
+          .catch((e) => {
+            console.error('에러 발생', e);
+            res.writeHead(500);
+            res.end('Internal Server Error');
           });
       });
     }
