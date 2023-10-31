@@ -32,6 +32,8 @@ $ npm run http # 서버 실행
 - 사전에 결제 내역을 발급 함
 - 최종적으로 결제한 내역을 검증
 
+![sequence](./sequence-diagram.png)
+
 ## 결제하기
 
 `/public/index.html` 파일에 다음 스크립트 태그를 추가한다.
